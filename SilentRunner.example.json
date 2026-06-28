@@ -1,0 +1,68 @@
+{
+  // Este archivo debe llamarse igual que el .exe:
+  //   SilentRunner.exe  →  SilentRunner.json
+  //   MyTask.exe        →  MyTask.json
+  // Ambos deben estar en la misma carpeta.
+
+  "initialDelayMs": 0,
+
+  // Carpeta donde se escriben los logs.
+  // Vacío = misma carpeta que el .exe. Admite variables: %TEMP%, %APPDATA%, etc.
+  "logDirectory": "",
+
+  // Tamaño máximo de cada archivo de log en bytes. Por defecto 5 MB (5242880).
+  // Cuando se supera, se eliminan las entradas más antiguas del principio.
+  "maxLogSizeBytes": 5242880,
+
+  "tasks": [
+    {
+      // El log de salida se llama igual que el ejecutable: powershell.log
+      "name": "Ejecutar script PowerShell",
+      "executable": "powershell.exe",
+      "arguments": "-NonInteractive -WindowStyle Hidden -File \"C:\\scripts\\myscript.ps1\"",
+      "workingDirectory": "",
+      "captureOutput": true,
+      "waitForExit": true,
+      "timeoutMs": 30000,
+      "delayAfterMs": 500
+    },
+    {
+      // El log de salida se llamará: cmd.log
+      "name": "Comando CMD",
+      "executable": "cmd.exe",
+      "arguments": "/c dir C:\\",
+      "workingDirectory": "C:\\",
+      "captureOutput": true,
+      "waitForExit": true,
+      "timeoutMs": 10000,
+      "delayAfterMs": 0
+    },
+    {
+      // Sin captura de salida, se lanza y se olvida.
+      "name": "App en segundo plano (sin log de salida)",
+      "executable": "%PROGRAMFILES%\\MyApp\\app.exe",
+      "arguments": "--silent",
+      "workingDirectory": "",
+      "captureOutput": false,
+      "waitForExit": false,
+      "timeoutMs": 0,
+      "delayAfterMs": 0
+    },
+    {
+      // autoRestart=true: el launcher vigila el proceso y lo reinicia si se cierra o cae.
+      // El launcher permanece activo indefinidamente mientras haya tareas con autoRestart.
+      // No es compatible con waitForExit=true.
+      "name": "Servicio con auto-reinicio",
+      "executable": "%PROGRAMFILES%\\MyApp\\daemon.exe",
+      "arguments": "--run",
+      "workingDirectory": "",
+      "captureOutput": true,
+      "waitForExit": false,
+      "timeoutMs": 0,
+      "delayAfterMs": 0,
+      "autoRestart": true,
+      // Tiempo en ms que se espera antes de volver a lanzar el proceso tras una caída.
+      "restartDelayMs": 2000
+    }
+  ]
+}

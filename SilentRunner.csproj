@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <AssemblyName>SilentRunner</AssemblyName>
+    <Authors>José Luis Bautista Martín</Authors>
+    <Company>José Luis Bautista Martín</Company>
+    <Copyright>Copyright © 2026 José Luis Bautista Martín</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <ApplicationIcon>SilentRunner.ico</ApplicationIcon>
+    <UseWindowsForms>true</UseWindowsForms>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="SilentRunner.ico" />
+    <None Include="LICENSE" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.9" />
+  </ItemGroup>
+
+</Project>
