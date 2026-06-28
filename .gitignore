@@ -3,3 +3,10 @@ obj/
 *.user
 *.log
 .vs/
+.claude/
+*.nupkg
+*.snupkg
+project.assets.json
+*.nuget.props
+*.nuget.targets
+publish/
