@@ -24,6 +24,12 @@ public sealed class LaunchConfig
     /// </summary>
     public long MaxLogSizeBytes { get; set; } = 5 * 1024 * 1024;
 
+    /// <summary>
+    /// Si es <c>true</c>, elimina todos los archivos .log del directorio de logs al arrancar.
+    /// Valor por defecto: <c>false</c>.
+    /// </summary>
+    public bool ClearLogsOnStart { get; set; } = true;
+
     public List<TaskEntry> Tasks { get; set; } = [];
 }
 

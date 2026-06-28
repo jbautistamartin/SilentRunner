@@ -14,6 +14,9 @@
   // Cuando se supera, se eliminan las entradas más antiguas del principio.
   "maxLogSizeBytes": 5242880,
 
+  // Si es true, elimina todos los archivos .log del directorio de logs al arrancar.
+  "clearLogsOnStart": true,
+
   "tasks": [
     {
       // El log de salida se llama igual que el ejecutable: powershell.log

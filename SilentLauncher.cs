@@ -51,6 +51,15 @@ internal static class SilentLauncher
 
         Directory.CreateDirectory(dirLogs);
 
+        // ── Limpiar logs al inicio si está configurado ────────────────────────
+        if (config.ClearLogsOnStart)
+        {
+            foreach (var logFile in Directory.EnumerateFiles(dirLogs, "*.log"))
+            {
+                try { File.Delete(logFile); } catch { }
+            }
+        }
+
         long maxBytes = config.MaxLogSizeBytes > 0
             ? config.MaxLogSizeBytes
             : 5 * 1024 * 1024;
