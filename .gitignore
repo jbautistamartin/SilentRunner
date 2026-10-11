@@ -1,0 +1,16 @@
+bin/
+obj/
+*.user
+*.log
+.vs/
+.claude/
+*.nupkg
+*.snupkg
+project.assets.json
+*.nuget.props
+*.nuget.targets
+publish/
+
+# Claves de firma de ensamblados — nunca deben entrar en el repositorio
+*.snk
+*.pfx
