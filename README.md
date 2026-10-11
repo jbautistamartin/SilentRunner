@@ -1,8 +1,43 @@
 # SilentRunner
 
+[![Última versión](https://img.shields.io/github/v/release/jbautistamartin/SilentRunner?label=descarga&color=2ea44f)](https://github.com/jbautistamartin/SilentRunner/releases/latest)
+[![Licencia MIT](https://img.shields.io/badge/licencia-MIT-blue)](LICENSE)
 [![Donar con PayPal](https://img.shields.io/badge/Donar-PayPal-00457C?logo=paypal&logoColor=white)](https://paypal.me/jbautistamartin)
 
 Lanzador de procesos y comandos de consola completamente oculto — sin ventanas, sin consola visible, con captura de salida en log rotativo.
+
+## Descarga
+
+Descarga la última versión desde la **[página de releases](https://github.com/jbautistamartin/SilentRunner/releases/latest)**.
+
+El paquete `SilentRunner-<version>-win-x64.zip` contiene:
+
+| Archivo | Para qué sirve |
+|---|---|
+| `SilentRunner.exe` | Ejecutable único (~1,8 MB). Requiere .NET 10 instalado |
+| `SilentRunner.example.json` | Plantilla de configuración anotada |
+| `README.md` | Esta documentación |
+| `LICENSE` | Licencia MIT |
+
+Puesta en marcha:
+
+1. Extrae el ZIP en la carpeta que quieras — por ejemplo `C:\tools\SilentRunner`.
+2. Copia `SilentRunner.example.json` como `SilentRunner.json` y define tus tareas.
+3. Ejecuta `SilentRunner.exe`. No abre ninguna ventana: aparece como icono en la bandeja del sistema, y desde su menú contextual controlas cada tarea.
+
+Sin archivo de configuración el programa arranca igualmente, con la bandeja vacía.
+
+### Verificar la descarga
+
+El ejecutable **no está firmado con un certificado de firma de código**, así que la primera vez Windows SmartScreen mostrará un aviso de «Editor desconocido» — *Más información* → *Ejecutar de todas formas*. Es el comportamiento normal de cualquier binario sin certificado comercial.
+
+Para confirmar que el archivo descargado es exactamente el publicado, compara su hash con el contenido de `SHA256SUMS.txt`, incluido en el release:
+
+```powershell
+Get-FileHash .\SilentRunner-1.0.0-win-x64.zip -Algorithm SHA256
+```
+
+El ensamblado interno lleva además **nombre seguro** (*strong name*), con token público `a313609336f4f9ff`.
 
 ## Funcionamiento
 

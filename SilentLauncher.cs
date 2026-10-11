@@ -1,7 +1,6 @@
 // Copyright © 2026 José Luis Bautista Martín. Licensed under the MIT License.
 
 using System.Text.Json;
-using System.Windows.Forms;
 
 namespace SilentRunner;
 
