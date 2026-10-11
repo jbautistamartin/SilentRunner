@@ -24,6 +24,58 @@ dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=
 
 Target: `net10.0-windows`, `OutputType=WinExe` (no console window). No tests exist in this repo.
 
+## Versioning & signing
+
+Version and signing live in `SilentRunner.csproj`:
+
+```xml
+<Version>1.0.0</Version>
+<AssemblyVersion>1.0.0.0</AssemblyVersion>
+<FileVersion>1.0.0.0</FileVersion>
+<InformationalVersion>1.0.0</InformationalVersion>
+<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+<AssemblyOriginatorKeyFile>..\Claves\capicua.snk</AssemblyOriginatorKeyFile>
+<SignAssembly Condition="Exists('$(AssemblyOriginatorKeyFile)')">true</SignAssembly>
+```
+
+- `IncludeSourceRevisionInInformationalVersion=false` keeps Windows' "Product version" as a clean `1.0.0`; without it .NET appends `+<commit sha>`.
+- **The strong-name key is never committed.** It lives outside the repository, one level up (`C:\Proyectos\Claves\capicua.snk` for the canonical checkout), and `*.snk` / `*.pfx` are gitignored.
+- The `Exists(...)` condition means a clone without the key still builds — it just produces an **unsigned** assembly instead of failing. Verified: overriding the key path to a missing file and forcing a rebuild yields a working, unsigned binary.
+- Consequence to watch: moving the repo so it no longer sits beside `Claves\` silently drops the signature, with no build error. Check the public key token before shipping a release:
+
+```powershell
+[System.Reflection.AssemblyName]::GetAssemblyName("bin\Release\net10.0-windows\SilentRunner.dll").FullName
+# expected token: a313609336f4f9ff
+```
+
+The token is **not** readable from the single-file published `.exe` — the managed assembly is embedded in the bundle, so `GetAssemblyName` throws there. Verify on the intermediate `.dll` instead.
+
+Strong-naming is not Authenticode: it gives the assembly an identity, but does nothing for SmartScreen. The published `.exe` is unsigned in the code-signing sense, and the release notes say so.
+
+## Release process
+
+Bumping a version means editing the four version properties above, updating `CHANGELOG.md`, and then:
+
+```bash
+# 1. Everything committed on a release/vX.Y.Z branch, docs included.
+# 2. Merge into main with a merge commit, then tag main.
+git switch main && git merge --no-ff release/vX.Y.Z -m "Release vX.Y.Z"
+git tag -a vX.Y.Z -m "SilentRunner vX.Y.Z"
+
+# 3. Merge back into develop so the release commits are not stranded.
+git switch develop && git merge --no-ff release/vX.Y.Z
+
+# 4. Push branches and tag.
+git push origin main develop vX.Y.Z
+
+# 5. Build the release artifact (framework-dependent single file).
+dotnet publish SilentRunner.csproj -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -p:PublishReadyToRun=true -o publish/fx
+
+# 6. Package exe + example config + README + LICENSE, add SHA256SUMS.txt, publish.
+gh release create vX.Y.Z --title "SilentRunner vX.Y.Z" --notes-file <notes> <assets>
+```
+
+Releases ship the **framework-dependent** single-file build (~1.8 MB, requires .NET 10 on the target), not the self-contained one. `PublishReadyToRun` is what makes it ~1.8 MB rather than a few hundred KB. Pass the publish flags explicitly rather than relying on `Properties/PublishProfiles/FolderProfile.pubxml`, so the command is reproducible.
 ## Architecture
 
 SilentRunner is a Windows-only, windowless process launcher. It reads a JSON config file named identically to the executable (`SilentRunner.exe` → `SilentRunner.json`) and launches each task invisibly.
@@ -50,6 +102,7 @@ SilentRunner is a Windows-only, windowless process launcher. It reads a JSON con
 | `Program.cs` | Entry point with `[STAThread]` — single call to `SilentLauncher.Run()` |
 | `ProcessJob.cs` | Windows Job Object wrapper (kill-on-close) |
 | `SilentRunner.example.json` | Annotated config template |
+| `CHANGELOG.md` | Release notes per version — the source for `gh release --notes-file` |
 | `MenuIconos.cs` | GDI+ drawn icons for every tray menu item (cached, never disposed — they are shared across menu rebuilds) |
 | `SilentRunner.ico` | Tray/app icon (ghost on dark background) — also embedded as resource |
 
