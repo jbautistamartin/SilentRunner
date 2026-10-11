@@ -1,5 +1,7 @@
 # SilentRunner
 
+[![Donar con PayPal](https://img.shields.io/badge/Donar-PayPal-00457C?logo=paypal&logoColor=white)](https://paypal.me/jbautistamartin)
+
 Lanzador de procesos y comandos de consola completamente oculto — sin ventanas, sin consola visible, con captura de salida en log rotativo.
 
 ## Funcionamiento
@@ -124,6 +126,14 @@ dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=
 ```
 
 El `.exe` resultante en `bin/Release/net10.0-windows/win-x64/publish/` funciona sin tener .NET instalado.
+
+## Apoyar el proyecto
+
+SilentRunner es gratuito y de código abierto. Si te resulta útil, puedes invitarme a un café:
+
+[![Donar con PayPal](https://img.shields.io/badge/Donar-PayPal-00457C?logo=paypal&logoColor=white)](https://paypal.me/jbautistamartin)
+
+También encontrarás el enlace en el menú del icono de la bandeja del sistema (**Invitar a un café**). Es completamente opcional: la aplicación no muestra avisos ni limita ninguna función.
 
 ## Licencia
 

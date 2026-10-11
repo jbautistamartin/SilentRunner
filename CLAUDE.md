@@ -50,15 +50,19 @@ SilentRunner is a Windows-only, windowless process launcher. It reads a JSON con
 | `Program.cs` | Entry point with `[STAThread]` — single call to `SilentLauncher.Run()` |
 | `ProcessJob.cs` | Windows Job Object wrapper (kill-on-close) |
 | `SilentRunner.example.json` | Annotated config template |
+| `MenuIconos.cs` | GDI+ drawn icons for every tray menu item (cached, never disposed — they are shared across menu rebuilds) |
 | `SilentRunner.ico` | Tray/app icon (ghost on dark background) — also embedded as resource |
 
 **Tray menu structure** (rebuilt on every right-click via `ContextMenuStrip.Opening`):
-- `▶ Iniciar todos` / `⏹ Detener todos` (disabled if inapplicable)
-- Per task: `● TaskName` (running) or `○ TaskName` (stopped), submenu → Iniciar/Detener, `📄 Abrir log`, `🗑 Borrar log` (both disabled if log file doesn't exist)
-- `📄 Abrir log del launcher` — opens `<ExeName>.log` directly (disabled if not yet created)
+- `Iniciar todos` / `Detener todos` (disabled if inapplicable)
+- Per task: `TaskName` with a filled green dot (running) or hollow grey ring (stopped), submenu → Iniciar/Detener, `Abrir log`, `Borrar log` (both disabled if log file doesn't exist)
+- `Abrir log del launcher` — opens `<ExeName>.log` directly (disabled if not yet created)
 - `Abrir carpeta de logs` — opens the log directory in Explorer
 - `Limpiar logs` — truncates all `.log` files in the log directory
+- `Invitar a un café` — opens the PayPal donation link in the default browser (private const `UrlDonacion` in `TrayApp.cs`)
 - `Salir` — stops all tasks and exits
+
+Every item carries an `Image` from `MenuIconos`, not an emoji in its text: `ToolStripItem` labels are drawn by GDI, which renders emoji monochrome. The icons are cached statics — `ToolStripItem.Dispose()` does **not** dispose an item's `Image` (verified), so the menu rebuild must not dispose them either.
 
 **`TaskController`** has three execution modes determined by `TaskEntry` flags:
 - `AutoRestart=true` — background thread loops: launch → `WaitForExit()` → sleep `RestartDelayMs` → repeat. `Stop()` cancels immediately via `CancellationTokenSource`; cancellable sleep uses `ct.WaitHandle.WaitOne(ms)`.

@@ -15,6 +15,9 @@ internal sealed class TrayApp : ApplicationContext
     private readonly string _logLauncher;
     private readonly NotifyIcon _trayIcon;
 
+    /// <summary>Enlace de donación que se abre desde el menú contextual.</summary>
+    private const string UrlDonacion = "https://paypal.me/jbautistamartin";
+
     internal TrayApp(IReadOnlyList<TaskController> controllers, string dirLogs, string logLauncher)
     {
         _controllers = controllers;
@@ -43,7 +46,7 @@ internal sealed class TrayApp : ApplicationContext
         var itemsAnteriores = menu.Items.Cast<ToolStripItem>().ToList();
         menu.Items.Clear();
         foreach (var item in itemsAnteriores)
-            item.Dispose();
+            item.Dispose(); // los iconos de MenuIconos son compartidos: no se liberan aquí
 
         if (_controllers.Count == 0)
         {
@@ -55,10 +58,18 @@ internal sealed class TrayApp : ApplicationContext
             bool hayDetenidas = _controllers.Any(c => !c.IsRunning);
 
             // ── Acciones globales ────────────────────────────────────────────
-            var iniciarTodos = new ToolStripMenuItem("▶  Iniciar todos") { Enabled = hayDetenidas };
+            var iniciarTodos = new ToolStripMenuItem("Iniciar todos")
+            {
+                Image = MenuIconos.Iniciar,
+                Enabled = hayDetenidas,
+            };
             iniciarTodos.Click += (_, _) => { foreach (var c in _controllers) c.Start(); };
 
-            var detenerTodos = new ToolStripMenuItem("⏹  Detener todos") { Enabled = hayEnEjecucion };
+            var detenerTodos = new ToolStripMenuItem("Detener todos")
+            {
+                Image = MenuIconos.Detener,
+                Enabled = hayEnEjecucion,
+            };
             detenerTodos.Click += (_, _) => { foreach (var c in _controllers) c.Stop(); };
 
             menu.Items.Add(iniciarTodos);
@@ -69,20 +80,22 @@ internal sealed class TrayApp : ApplicationContext
             foreach (var ctrl in _controllers)
             {
                 bool activa = ctrl.IsRunning;
-                string prefijo = activa ? "●  " : "○  ";
 
-                var tareaItem = new ToolStripMenuItem(prefijo + ctrl.Name);
+                var tareaItem = new ToolStripMenuItem(ctrl.Name)
+                {
+                    Image = activa ? MenuIconos.TareaActiva : MenuIconos.TareaInactiva,
+                };
 
                 if (activa)
                 {
-                    var detener = new ToolStripMenuItem("⏹  Detener");
+                    var detener = new ToolStripMenuItem("Detener") { Image = MenuIconos.Detener };
                     var c = ctrl; // captura local para el closure
                     detener.Click += (_, _) => c.Stop();
                     tareaItem.DropDownItems.Add(detener);
                 }
                 else
                 {
-                    var iniciar = new ToolStripMenuItem("▶  Iniciar");
+                    var iniciar = new ToolStripMenuItem("Iniciar") { Image = MenuIconos.Iniciar };
                     var c = ctrl;
                     iniciar.Click += (_, _) => c.Start();
                     tareaItem.DropDownItems.Add(iniciar);
@@ -93,7 +106,11 @@ internal sealed class TrayApp : ApplicationContext
                 var logPath = ctrl.LogPath;
                 bool logExiste = File.Exists(logPath);
 
-                var abrirLog = new ToolStripMenuItem("📄  Abrir log") { Enabled = logExiste };
+                var abrirLog = new ToolStripMenuItem("Abrir log")
+                {
+                    Image = MenuIconos.Documento,
+                    Enabled = logExiste,
+                };
                 abrirLog.Click += (_, _) =>
                 {
                     try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(logPath) { UseShellExecute = true }); }
@@ -101,7 +118,11 @@ internal sealed class TrayApp : ApplicationContext
                 };
                 tareaItem.DropDownItems.Add(abrirLog);
 
-                var borrarLog = new ToolStripMenuItem("🗑  Borrar log") { Enabled = logExiste };
+                var borrarLog = new ToolStripMenuItem("Borrar log")
+                {
+                    Image = MenuIconos.Papelera,
+                    Enabled = logExiste,
+                };
                 borrarLog.Click += (_, _) =>
                 {
                     try { File.Delete(logPath); }
@@ -119,7 +140,7 @@ internal sealed class TrayApp : ApplicationContext
 
         menu.Items.Add(new ToolStripSeparator());
 
-        var abrirLogLauncher = new ToolStripMenuItem("📄  Abrir log del launcher");
+        var abrirLogLauncher = new ToolStripMenuItem("Abrir log del launcher") { Image = MenuIconos.Documento };
         abrirLogLauncher.Enabled = File.Exists(_logLauncher);
         abrirLogLauncher.Click += (_, _) =>
         {
@@ -128,15 +149,23 @@ internal sealed class TrayApp : ApplicationContext
         };
         menu.Items.Add(abrirLogLauncher);
 
-        var abrirLogs = new ToolStripMenuItem("Abrir carpeta de logs");
+        var abrirLogs = new ToolStripMenuItem("Abrir carpeta de logs") { Image = MenuIconos.Carpeta };
         abrirLogs.Click += (_, _) => AbrirLogs();
         menu.Items.Add(abrirLogs);
 
-        var limpiarLogs = new ToolStripMenuItem("Limpiar logs");
+        var limpiarLogs = new ToolStripMenuItem("Limpiar logs") { Image = MenuIconos.Escoba };
         limpiarLogs.Click += (_, _) => LimpiarLogs();
         menu.Items.Add(limpiarLogs);
 
-        var salir = new ToolStripMenuItem("Salir");
+        menu.Items.Add(new ToolStripSeparator());
+
+        var donar = new ToolStripMenuItem("Invitar a un café") { Image = MenuIconos.Corazon };
+        donar.Click += (_, _) => AbrirUrl(UrlDonacion);
+        menu.Items.Add(donar);
+
+        menu.Items.Add(new ToolStripSeparator());
+
+        var salir = new ToolStripMenuItem("Salir") { Image = MenuIconos.Salir };
         salir.Click += (_, _) => Salir();
         menu.Items.Add(salir);
     }
@@ -158,6 +187,12 @@ internal sealed class TrayApp : ApplicationContext
     private void AbrirLogs()
     {
         try { System.Diagnostics.Process.Start("explorer.exe", _dirLogs); }
+        catch { }
+    }
+
+    private static void AbrirUrl(string url)
+    {
+        try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(url) { UseShellExecute = true }); }
         catch { }
     }
 
