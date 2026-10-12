@@ -10,10 +10,10 @@
     <Authors>José Luis Bautista Martín</Authors>
     <Company>José Luis Bautista Martín</Company>
     <Copyright>Copyright © 2026 José Luis Bautista Martín</Copyright>
-    <Version>1.0.0</Version>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <FileVersion>1.0.0.0</FileVersion>
-    <InformationalVersion>1.0.0</InformationalVersion>
+    <Version>1.1.0</Version>
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <FileVersion>1.1.0.0</FileVersion>
+    <InformationalVersion>1.1.0</InformationalVersion>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <!-- La clave de firma vive fuera del repositorio: nunca se publica con el código.
          Si no está disponible (p. ej. un clon de otra persona), el proyecto compila sin firmar. -->

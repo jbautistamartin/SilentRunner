@@ -30,6 +30,13 @@ public sealed class LaunchConfig
     /// </summary>
     public bool ClearLogsOnStart { get; set; } = true;
 
+    /// <summary>
+    /// Si es <c>true</c>, pregunta una vez al día si hay una versión más nueva publicada en
+    /// GitHub y lo dice en el menú de la bandeja. No descarga ni instala nada por su cuenta.
+    /// Valor por defecto: <c>true</c>.
+    /// </summary>
+    public bool CheckForUpdates { get; set; } = true;
+
     public List<TaskEntry> Tasks { get; set; } = [];
 }
 
