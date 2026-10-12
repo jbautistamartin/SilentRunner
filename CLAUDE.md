@@ -103,6 +103,8 @@ SilentRunner is a Windows-only, windowless process launcher. It reads a JSON con
 | `ProcessJob.cs` | Windows Job Object wrapper (kill-on-close) |
 | `SilentRunner.example.json` | Annotated config template |
 | `CHANGELOG.md` | Release notes per version — the source for `gh release --notes-file` |
+| `AcercaDe.cs` | The only window the program opens: «Acerca de», built by hand with no designer. Also holds the two outbound URLs |
+| `ComprobadorDeVersion.cs` | Asks GitHub for the latest release, compares it with the running version and downloads the ZIP on demand. Never replaces the running exe |
 | `MenuIconos.cs` | GDI+ drawn icons for every tray menu item (cached, never disposed — they are shared across menu rebuilds) |
 | `SilentRunner.ico` | Tray/app icon (ghost on dark background) — also embedded as resource |
 
@@ -112,10 +114,67 @@ SilentRunner is a Windows-only, windowless process launcher. It reads a JSON con
 - `Abrir log del launcher` — opens `<ExeName>.log` directly (disabled if not yet created)
 - `Abrir carpeta de logs` — opens the log directory in Explorer
 - `Limpiar logs` — truncates all `.log` files in the log directory
-- `Invitar a un café` — opens the PayPal donation link in the default browser (private const `UrlDonacion` in `TrayApp.cs`)
+- `Hay una versión nueva: vX.Y.Z` — only when the version check found one; opens the About window
+- `Acerca de SilentRunner` — opens the About window (see below)
+- `Invitar a un café` — opens the PayPal donation link in the default browser
 - `Salir` — stops all tasks and exits
 
 Every item carries an `Image` from `MenuIconos`, not an emoji in its text: `ToolStripItem` labels are drawn by GDI, which renders emoji monochrome. The icons are cached statics — `ToolStripItem.Dispose()` does **not** dispose an item's `Image` (verified), so the menu rebuild must not dispose them either.
+
+**The About window** (`AcercaDe.cs`) is the **only** window the program has, and it exists because
+a tray menu has nowhere to say what version is running or who answers for it. It follows the shape
+of the «Acerca de» screens in the house's Android apps — identity block, a bordered card per
+subject (the project, the liability notice, the donation) and the licence line at the bottom —
+rendered with Windows Forms controls instead of Material cards, which is why it is laid out with
+nested `FlowLayoutPanel`s and `AutoSize` rather than fixed coordinates: the text wraps and the
+window grows to fit it at any DPI.
+
+Three things about it are deliberate:
+
+- **It owns the two outbound URLs.** `UrlProyecto` and `UrlDonacion` are `internal const` here and
+  the tray menu reads them from this class, instead of `TrayApp` keeping its own copy as it did.
+  This is the screen that signs the program, exactly as `AboutFragment` holds them in the Android
+  apps.
+- **It is not modal, and there is only ever one.** A static `_abierta` brings the open window to
+  the front instead of stacking a second one, and being non-modal keeps the tray usable — a task
+  can still be stopped or a log opened while it is up.
+- **Version and icon are not typed out.** The version comes from
+  `AssemblyInformationalVersionAttribute` (the `.csproj` is the single source, and
+  `IncludeSourceRevisionInInformationalVersion=false` is what keeps it a clean `1.0.0`), and the
+  icon from `TrayApp.CargarIcono()`, which became `internal` for this. Each one takes its **own**
+  `Icon` instance: the tray's lives as long as the process, so the window must not dispose it.
+  Everything the window creates — the two scaled bitmaps and the fonts — is tracked and disposed
+  with it, but `MenuIconos.Corazon` is only ever **copied**, never handed over, because those
+  icons are shared statics.
+
+**The version check** (`ComprobadorDeVersion.cs`, on by default, `checkForUpdates: false` turns it
+off) asks `api.github.com` for the latest release, compares the tag with the assembly version and —
+if the published one wins — sets `ComprobadorDeVersion.Conocida`, which is what the tray menu and
+the About window both read. `TrayApp` drives it with a **Windows Forms** timer (first tick 30 s
+after start so it never delays launching the tasks, then every six hours; the checker itself
+enforces a 24-hour minimum), and that choice matters: its `Tick` arrives on the UI thread, the only
+one allowed to touch the `NotifyIcon`. A balloon tip announces it once, and the menu grows a «Hay
+una versión nueva» entry that opens the About window.
+
+Four things that are deliberate, and will look wrong if you change them without reading this:
+
+- **It compares numbers, never strings.** `"1.10.0" < "1.9.0"` as text, which would silently stop
+  the notice at the tenth release. `Interpretar` strips a leading `v` and anything after `-`/`+`
+  and hands the rest to `System.Version`.
+- **One check a day, with `If-None-Match`.** The unauthenticated API allows 60 requests per hour
+  per IP and a 304 does not count against it. The *Buscar ahora* button passes `forzar: true`,
+  because someone who pressed it wants today's answer. The timestamp and the ETag live in
+  `%LOCALAPPDATA%\SilentRunner\actualizacion.json`, **not** beside the exe: the usual install is
+  a read-only tools folder, and failing to write this can never stop the program from starting.
+- **Silence on failure, but not for the person who asked.** `Buscar` returns `null` both for «you
+  are up to date» and for «could not ask», which is right for the background check — both mean say
+  nothing — and wrong for the button, so `UltimoProblema` carries the reason for the window to show.
+  A 404 is not a failure: it means the repo has no releases yet.
+- **It does not update anything.** The window downloads the ZIP to `%TEMP%`, verifies it against the
+  release's `SHA256SUMS.txt` (deleting the file if the hash does not match) and opens Explorer with
+  it selected. Replacing the running exe is left to a person, for the reasons written at the top of
+  `ComprobadorDeVersion.cs`: the Job Object kills the children on exit, SmartScreen re-prompts on
+  an unsigned binary, and an unsigned self-replacing executable is an antivirus heuristic.
 
 **`TaskController`** has three execution modes determined by `TaskEntry` flags:
 - `AutoRestart=true` — background thread loops: launch → `WaitForExit()` → sleep `RestartDelayMs` → repeat. `Stop()` cancels immediately via `CancellationTokenSource`; cancellable sleep uses `ct.WaitHandle.WaitOne(ms)`.

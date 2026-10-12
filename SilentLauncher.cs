@@ -88,7 +88,7 @@ internal static class SilentLauncher
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
 
-        using var trayApp = new TrayApp(controladores, dirLogs, logLauncher);
+        using var trayApp = new TrayApp(controladores, dirLogs, logLauncher, maxBytes, config.CheckForUpdates);
         Application.Run(trayApp);
 
         // ── Al salir: detener las tareas que queden activas ───────────────────

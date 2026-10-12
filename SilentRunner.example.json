@@ -17,6 +17,11 @@
   // Si es true, elimina todos los archivos .log del directorio de logs al arrancar.
   "clearLogsOnStart": true,
 
+  // Si es true, pregunta a GitHub una vez al dia si hay publicada una version mas nueva
+  // y lo dice en el menu de la bandeja. Solo avisa: no descarga ni instala nada por su
+  // cuenta. Ponlo en false en un equipo sin salida a internet o si no quieres el aviso.
+  "checkForUpdates": true,
+
   "tasks": [
     {
       // El log de salida se llama igual que el ejecutable: powershell.log

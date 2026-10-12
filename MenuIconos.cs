@@ -31,7 +31,7 @@ internal static class MenuIconos
     // ── Iconos (generación diferida y cacheada) ───────────────────────────────
 
     private static Image? _iniciar, _detener, _activa, _inactiva;
-    private static Image? _documento, _papelera, _carpeta, _escoba, _corazon, _salir;
+    private static Image? _documento, _papelera, _carpeta, _escoba, _corazon, _informacion, _salir;
 
     internal static Image Iniciar => _iniciar ??= Crear(DibujarIniciar);
     internal static Image Detener => _detener ??= Crear(DibujarDetener);
@@ -42,6 +42,7 @@ internal static class MenuIconos
     internal static Image Carpeta => _carpeta ??= Crear(DibujarCarpeta);
     internal static Image Escoba => _escoba ??= Crear(DibujarEscoba);
     internal static Image Corazon => _corazon ??= Crear(DibujarCorazon);
+    internal static Image Informacion => _informacion ??= Crear(DibujarInformacion);
     internal static Image Salir => _salir ??= Crear(DibujarSalir);
 
     // ── Infraestructura de dibujo ─────────────────────────────────────────────
@@ -185,6 +186,20 @@ internal static class MenuIconos
         using var borde = new Pen(DoradoBorde, s / 28f);
         g.FillPath(relleno, trazado);
         g.DrawPath(borde, trazado);
+    }
+
+    private static void DibujarInformacion(Graphics g, float s)
+    {
+        // Disco con la «i» calada: el gris de pizarra de los iconos que no son una
+        // acción sobre las tareas, y el papel de la hoja del log para la letra.
+        using var disco = new SolidBrush(Pizarra);
+        g.FillEllipse(disco, R(s, 0.14f, 0.14f, 0.72f, 0.72f));
+
+        using var tinta = new SolidBrush(Papel);
+        g.FillEllipse(tinta, R(s, 0.44f, 0.26f, 0.12f, 0.12f)); // el punto
+
+        using var palo = new Pen(Papel, s * 0.12f) { StartCap = LineCap.Round, EndCap = LineCap.Round };
+        g.DrawLine(palo, P(s, 0.50f, 0.45f), P(s, 0.50f, 0.72f));
     }
 
     private static void DibujarSalir(Graphics g, float s)

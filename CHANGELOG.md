@@ -3,6 +3,22 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/);
 versionado según [SemVer](https://semver.org/lang/es/).
 
+## [1.1.0] - 2026-10-11
+
+### Añadido
+
+- **Aviso de versión nueva.** Una vez al día pregunta a GitHub si hay publicada una versión más
+  nueva; si la hay, lo dice con un globo en la bandeja, con una entrada en su menú y en la ventana
+  «Acerca de», desde donde se puede abrir el release o **descargar el ZIP comprobando su hash**
+  contra el `SHA256SUMS.txt` publicado. No se actualiza solo: reemplazar el ejecutable que está
+  corriendo lo hace una persona, con el programa cerrado. Se apaga con `checkForUpdates: false`.
+
+- **Ventana «Acerca de»**, abierta desde el menú de la bandeja: versión instalada (leída del
+  ensamblado, no escrita a mano), autoría, enlace a la página del proyecto en GitHub, aviso de
+  responsabilidad, donativo y licencia. Es la única ventana del programa, no es modal —con ella
+  delante se sigue pudiendo parar una tarea o abrir un log— y abrirla dos veces trae al frente la
+  que ya estaba.
+
 ## [1.0.0] - 2026-10-10
 
 Primera versión publicada.
